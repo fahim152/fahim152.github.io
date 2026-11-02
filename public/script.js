@@ -65,5 +65,5 @@ if ('IntersectionObserver' in window) {
       entranceObserver.unobserve(entry.target);
     }
   }, { threshold: 0.12 });
-  document.querySelectorAll('.section-heading, .degree, .research-card, .about-copy, .contact-inner').forEach(element => entranceObserver.observe(element));
+  document.querySelectorAll('.section-heading, .degree, .research-card, .about-copy, .hobby-card, .contact-inner').forEach(element => entranceObserver.observe(element));
 }

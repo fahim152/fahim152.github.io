@@ -106,6 +106,8 @@ try {
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('a[href^="#"]')].filter(a => !document.getElementById(a.hash.slice(1))).map(a => a.hash)`), []);
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('a[target="_blank"]')].filter(a => !a.rel.includes('noopener') || !a.rel.includes('noreferrer')).map(a => a.href)`), []);
   assert.equal(await evaluate(`document.querySelectorAll('h1').length`), 1);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('.hobby-card h3')].map(node => node.textContent)`), ['Table tennis.', 'Gaming.', 'Metal music.'], 'All requested hobbies are visible');
+  assert.deepEqual(await evaluate(`['--powder', '--paper', '--orange'].map(name => getComputedStyle(document.documentElement).getPropertyValue(name).trim().toUpperCase())`), ['#A8C9C8', '#FFFFFF', '#F45B0B'], 'Requested brand palette');
   assert.equal(await evaluate(`/manufacturing|moulding/i.test(document.querySelector('#home').textContent + document.querySelector('.credentials').textContent + document.querySelector('meta[name="description"]').content + document.querySelector('meta[property="og:description"]').content)`), false, 'General positioning is industry-neutral');
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('.job-location')].map(node => node.textContent)`), [
     'Billund, Denmark', 'Billund, Denmark',
@@ -145,9 +147,9 @@ try {
     await command('Emulation.setDeviceMetricsOverride', { width, height: width > 800 ? 1000 : 844, deviceScaleFactor: 1, mobile: width < 600 });
     await evaluate(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))`);
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, `No overflow at ${width}px`);
-    const clipped = await evaluate(`[...document.querySelectorAll('h1,h2,h3,nav,.job summary,.system-controls')].filter(el => el.scrollWidth > el.clientWidth + 1).map(el => el.tagName + '.' + el.className)`);
+    const clipped = await evaluate(`[...document.querySelectorAll('h1,h2,h3,nav,.job summary,.system-controls,.hobby-card,.hobby-bottom')].filter(el => el.scrollWidth > el.clientWidth + 1).map(el => el.tagName + '.' + el.className)`);
     assert.deepEqual(clipped, [], `No clipped key content at ${width}px`);
-    assert.deepEqual(await evaluate(`[...document.querySelectorAll('.hero-intro, .section-heading>p, .job-body, .degree-description, .about-copy>p')].filter(el => parseFloat(getComputedStyle(el).fontSize) < 16).map(el => el.className)`), [], `Body text remains at least 16px at ${width}px`);
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('.hero-intro, .section-heading>p, .job-body, .degree-description, .about-copy>p, .hobby-card>p')].filter(el => parseFloat(getComputedStyle(el).fontSize) < 16).map(el => el.className)`), [], `Body text remains at least 16px at ${width}px`);
     assert.deepEqual(await evaluate(`[...document.querySelectorAll('.credentials span, .job-location, .text-link')].filter(el => parseFloat(getComputedStyle(el).fontSize) < 14).map(el => el.className)`), [], `Supporting text remains at least 14px at ${width}px`);
     await evaluate(`document.querySelectorAll('details').forEach(detail => { detail.open = true; })`);
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, `Expanded chapters fit at ${width}px`);
@@ -180,6 +182,7 @@ try {
   await navigate();
   assert.equal(await evaluate(`document.querySelector('.system-controls').hidden`), true);
   assert.equal(await evaluate(`document.querySelectorAll('.job').length`), 5);
+  assert.equal(await evaluate(`document.querySelectorAll('.hobby-card').length`), 3, 'Hobbies remain available without JavaScript');
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.hero-intro')).display !== 'none'`), true);
   assert.deepEqual(errors, [], 'No JavaScript, CSP, or resource errors');
   assert(requests.every(url => url.startsWith(origin)), 'No third-party page requests');
